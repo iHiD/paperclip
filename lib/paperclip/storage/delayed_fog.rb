@@ -5,27 +5,19 @@ module Paperclip
       def self.extended base
         
         # Cache the current_url before Fog changes it
-        filesystem_url  = @filesystem_url  = base.instance_eval{@url}
-        filesystem_path = @filesystem_path = base.instance_eval{@path}
+        filesystem_url  = base.instance_eval{@url}
+        filesystem_path = base.instance_eval{@path}
         
         base.extend Fog
         base.instance_eval do
           if on_filesystem?
-<<<<<<< HEAD
-            @url = filesystem_url 
-            @path = filesystem_path
-=======
-            @url = @filesystem_url 
-            @path = @filesystem_path
->>>>>>> 59364105a3c6e85417f359c04a46087e1c026d01
+            @url = @filesystem_url = filesystem_url 
+            @path = @filesystem_path = filesystem_path
             @fog_path = @options[:fog_path]
           else
             @path = @options[:fog_path]
           end
         end
-        #Paperclip.interpolates(:filesystem_path) do |attachment, style|
-        #  attachment.filesystem_path(style)
-        #end unless Paperclip::Interpolations.respond_to? :filesystem_path
         
         # Set the processing property to true whenever we update the file.
         # It's important to add it to the eigenclass, not the actual Attachment class,
