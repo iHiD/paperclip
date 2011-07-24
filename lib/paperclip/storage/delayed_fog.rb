@@ -5,8 +5,8 @@ module Paperclip
       def self.extended base
         
         # Cache the current_url before Fog changes it
-        current_url = base.instance_eval{@url}
-        current_path = base.instance_eval{@path}
+        @filesystem_url  = base.instance_eval{@url}
+        @filesystem_path = base.instance_eval{@path}
         
         base.extend Fog
         base.instance_eval do
@@ -28,6 +28,8 @@ module Paperclip
         class << base
           alias_method :original_assign, :assign
           define_method :assign do |uploaded_file|
+            @path = @filesystem_path
+            @url  = @filesystem_url
             file = original_assign(uploaded_file)
             instance_write(:processing, true) if @dirty
             file
