@@ -11,8 +11,13 @@ module Paperclip
         base.extend Fog
         base.instance_eval do
           if on_filesystem?
+<<<<<<< HEAD
             @url = filesystem_url 
             @path = filesystem_path
+=======
+            @url = @filesystem_url 
+            @path = @filesystem_path
+>>>>>>> 59364105a3c6e85417f359c04a46087e1c026d01
             @fog_path = @options[:fog_path]
           else
             @path = @options[:fog_path]
