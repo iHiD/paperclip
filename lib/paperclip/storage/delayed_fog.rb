@@ -11,8 +11,8 @@ module Paperclip
         base.extend Fog
         base.instance_eval do
           if on_filesystem?
-            @url = current_url 
-            @path = current_path
+            @url = @filesystem_url 
+            @path = @filesystem_path
             @fog_path = @options[:fog_path]
           else
             @path = @options[:fog_path]
