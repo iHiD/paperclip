@@ -26,7 +26,9 @@ class DelayedFogTest < Test::Unit::TestCase
         :fog_host         => nil,
         :fog_public       => true,
         :fog_file         => {:cache_control => 1234},
-        :path             => ":attachment/:basename.:extension",
+        :path             => ":rails_root/public/:attachment/:basename.:extension",
+        :fog_path         => ":attachment/:basename.:extension",
+        :url              => "http://www.myhost.com/:attachment/:basename.:extension?:fingerprint",
         :storage          => :delayed_fog
       }
     end
@@ -55,7 +57,12 @@ class DelayedFogTest < Test::Unit::TestCase
       
       should "return the correct path" do
         @dummy.save
-        assert @dummy.avatar.url =~ /^\/system\/avatars\/1\/original\/5k.png\?\d*$/
+        assert @dummy.avatar.path =~ /^#{Rails.root}\/public\/avatars\/5k.png$/
+      end
+      
+      should "return the correct url" do
+        @dummy.save
+        assert @dummy.avatar.url =~ /^http:\/\/www.myhost.com\/avatars\/5k.png\?[a-zA-Z0-9&]*$/
       end
     end
   
@@ -109,8 +116,6 @@ class DelayedFogTest < Test::Unit::TestCase
             @dummy = Dummy.new
             @dummy.avatar = StringIO.new('.')
             @dummy.save
-          
-            # Upload the files so normal fog functionality can be tested
             @dummy.avatar.upload
           end
 
@@ -129,7 +134,12 @@ class DelayedFogTest < Test::Unit::TestCase
             # Upload the files so normal fog functionality can be tested
             @dummy.avatar.upload
           end
-
+      
+          #should "return the correct path" do
+          #  @dummy.save
+          #  assert @dummy.avatar.path =~ /^\/system\/avatars\/1\/original\/5k.png\?\d*$/
+          #end
+          
           should "provide a public url" do
             assert @dummy.avatar.url =~ /^http:\/\/example\.com\/avatars\/stringio\.txt\?\d*$/
           end
@@ -142,7 +152,9 @@ class DelayedFogTest < Test::Unit::TestCase
               :fog_credentials  => @credentials,
               :fog_host         => 'http://img%d.example.com',
               :fog_public       => true,
-              :path             => ":attachment/:basename.:extension",
+              :path             => ":rails_root/public/:attachment/:basename.:extension",
+              :fog_path         => ":attachment/:basename.:extension",
+              :url              => "http://www.myhost.com/:attachment/:basename.:extension",
               :storage          => :delayed_fog
             )
             @dummy = Dummy.new

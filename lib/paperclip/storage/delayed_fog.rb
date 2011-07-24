@@ -6,10 +6,21 @@ module Paperclip
         
         # Cache the current_url before Fog changes it
         current_url = base.instance_eval{@url}
+        current_path = base.instance_eval{@path}
+        
         base.extend Fog
         base.instance_eval do
-          @url = current_url if on_filesystem?
+          if on_filesystem?
+            @url = current_url 
+            @path = current_path
+            @fog_path = @options[:fog_path]
+          else
+            @path = @options[:fog_path]
+          end
         end
+        #Paperclip.interpolates(:filesystem_path) do |attachment, style|
+        #  attachment.filesystem_path(style)
+        #end unless Paperclip::Interpolations.respond_to? :filesystem_path
         
         # Set the processing property to true whenever we update the file.
         # It's important to add it to the eigenclass, not the actual Attachment class,
@@ -52,13 +63,19 @@ module Paperclip
       end
       
       def upload
+        # Update the url and path to be using fog
+        @url = ':fog_public_url'
+        @path = @fog_path
+        
+        # Use the fog code to write to the server
         @queued_for_write = {default_style => path(default_style)}
         styles.each{|style| @queued_for_write[style] = path(style)}
         fog_flush_writes
+        
+        # And finally log that the files are no longer on the filesystem
         instance_write(:processing, false)
         instance.save!
         @on_filesystem = false
-        @url = ':fog_public_url'
       end
       
       private
