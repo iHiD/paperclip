@@ -62,13 +62,15 @@ module Paperclip
       end
       
       def upload
+        # Add the existing files to the queue.
+        @queued_for_write = {default_style => path(default_style)}
+        styles.each{|style| @queued_for_write[style] = path(style)}
+        
         # Update the url and path to be using fog
         @url = ':fog_public_url'
         @path = @fog_path
         
-        # Use the fog code to write to the server
-        @queued_for_write = {default_style => path(default_style)}
-        styles.each{|style| @queued_for_write[style] = path(style)}
+        # Use fog to write to the server
         fog_flush_writes
         
         # And finally log that the files are no longer on the filesystem
