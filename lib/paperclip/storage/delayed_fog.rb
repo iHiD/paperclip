@@ -11,10 +11,19 @@ module Paperclip
         base.extend Fog
         base.instance_eval do
           if on_filesystem?
-            @url = @filesystem_url = filesystem_url 
-            @path = @filesystem_path = filesystem_path
+            # Revert the @url and @path to the original filesystem values, as fog will have changed them.
+            @url = filesystem_url 
+            @path = filesystem_path
+            
+            # Store fog_path incase we need it later
             @fog_path = @options[:fog_path]
           else
+            
+            # Store these as we refer to them later
+            @filesystem_url = filesystem_url 
+            @filesystem_path = filesystem_path
+            
+            # URL is set within fog, so we just update path here
             @path = @options[:fog_path]
           end
         end
@@ -25,8 +34,10 @@ module Paperclip
         class << base
           alias_method :original_assign, :assign
           define_method :assign do |uploaded_file|
-            @path = @filesystem_path
-            @url  = @filesystem_url
+            @path          = @filesystem_path
+            @url           = @filesystem_url
+            @on_filesystem = true
+            
             file = original_assign(uploaded_file)
             instance_write(:processing, true) if @dirty
             file
@@ -53,6 +64,11 @@ module Paperclip
         on_filesystem?? filesystem_exists?(style) : fog_exists?()
       end
       
+      def flush_writes
+        $stderr.puts "Flushing writes: Filesystem #{on_filesystem?}"
+        on_filesystem?? filesystem_flush_writes : fog_flush_writes
+      end
+      
       def flush_deletes
         on_filesystem?? filesystem_flush_deletes : fog_flush_deletes
       end
@@ -64,7 +80,7 @@ module Paperclip
       def upload
         # Add the existing files to the queue.
         @queued_for_write = {default_style => path(default_style)}
-        styles.each{|style| @queued_for_write[style] = path(style)}
+        styles.each{|style_name, style| @queued_for_write[style_name] = File.read(path(style_name))}
         
         # Update the url and path to be using fog
         @url = ':fog_public_url'
