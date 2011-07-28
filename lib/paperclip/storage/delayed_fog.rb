@@ -65,7 +65,6 @@ module Paperclip
       end
       
       def flush_writes
-        $stderr.puts "Flushing writes: Filesystem #{on_filesystem?}"
         on_filesystem?? filesystem_flush_writes : fog_flush_writes
       end
       
