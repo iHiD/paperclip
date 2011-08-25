@@ -12,8 +12,8 @@ module Paperclip
         base.instance_eval do
           if on_filesystem?
             # Revert the @url and @path to the original filesystem values, as fog will have changed them.
-            @url = filesystem_url 
-            @path = filesystem_path
+            @filesystem_url  = @url = filesystem_url 
+            @filesystem_path = @path = filesystem_path
             
             # Store fog_path incase we need it later
             @fog_path = @options[:fog_path]
