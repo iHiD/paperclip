@@ -90,7 +90,7 @@ module Paperclip
         
         # And finally log that the files are no longer on the filesystem
         instance_write(:processing, false)
-        instance.save!
+        instance.save!(:valiate => false)
         @on_filesystem = false
       end
       
