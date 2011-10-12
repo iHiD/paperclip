@@ -78,7 +78,7 @@ module Paperclip
       
       def upload
         # Add the existing files to the queue.
-        @queued_for_write = {default_style => path(default_style)}
+        @queued_for_write = {default_style => File.read(path(default_style))}
         styles.each{|style_name, style| @queued_for_write[style_name] = File.read(path(style_name))}
         
         # Update the url and path to be using fog
