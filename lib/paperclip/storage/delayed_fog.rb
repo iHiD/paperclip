@@ -65,7 +65,10 @@ module Paperclip
       end
       
       def flush_writes
-        on_filesystem?? filesystem_flush_writes : fog_flush_writes
+        return if  @queued_for_write.empty?
+        @path = @filesystem_path
+        @url = @filesystem_url
+        filesystem_flush_writes
       end
       
       def flush_deletes
